@@ -55,6 +55,7 @@ class Friendapi {
         .collection('friend requests')
         .snapshots();
   }
+
   static Stream<QuerySnapshot<Map<String, dynamic>>> getFriends() {
     return Apis.firestore
         .collection('Users')
@@ -62,7 +63,6 @@ class Friendapi {
         .collection('Friends')
         .snapshots();
   }
-  
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> showRequests(
       List<String> ids) {
@@ -82,6 +82,22 @@ class Friendapi {
         .doc(Apis.me.id)
         .collection('friend requests')
         .doc(chatuser.id)
+        .delete();
+  }
+
+  static RemoveUser(ChatUser chatuser) {
+    Apis.firestore
+        .collection('Users')
+        .doc(Apis.me.id)
+        .collection('Friends')
+        .doc(chatuser.id)
+        .delete();
+
+    Apis.firestore
+        .collection('Users')
+        .doc(chatuser.id)
+        .collection('Friends')
+        .doc(Apis.me.id)
         .delete();
   }
 }

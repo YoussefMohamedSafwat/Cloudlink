@@ -1,5 +1,7 @@
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:appchat/Screens/home_Screen.dart';
 import 'package:appchat/Screens/widgets/ImageButton.dart';
 import 'package:appchat/api/apis.dart';
 import 'package:appchat/helper/dat_utill.dart';
@@ -79,6 +81,23 @@ class _ViewprofileState extends State<Viewprofile> {
                       ),
                     ],
                   ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Dialogs.removeUser(widget.currentUser, context);
+                        },
+                        icon: Icon(
+                          Icons.person_remove,
+                          color: Colors.red,
+                        )),
+                    const Text("Unfriend"),
+                  ],
                 ),
                 const SizedBox(
                   height: 20,

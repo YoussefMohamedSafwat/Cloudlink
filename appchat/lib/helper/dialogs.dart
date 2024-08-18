@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:appchat/Screens/home_Screen.dart';
 import 'package:appchat/api/FriendApi.dart';
 import 'package:appchat/api/apis.dart';
 import 'package:appchat/models/chat_message.dart';
+import 'package:appchat/models/chat_user.dart';
 import 'package:flutter/material.dart';
 
 class Dialogs {
@@ -127,5 +129,59 @@ class Dialogs {
                 )
               ],
             ));
+  }
+
+  static bool removeUser(ChatUser chatuser, BuildContext context) {
+    bool request = false;
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              contentPadding:
+                  EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: const Row(
+                children: [
+                  Icon(
+                    Icons.person_remove,
+                    color: Colors.blue,
+                    size: 28,
+                  ),
+                  SizedBox(width: 8),
+                  Text("remove user")
+                ],
+              ),
+              content:
+                  const Text("Are you sure you want to remove this user ?"),
+              actions: [
+                MaterialButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    request = false;
+                  },
+                  child: const Text(
+                    "No",
+                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                  ),
+                ),
+                MaterialButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+
+                    await Friendapi.RemoveUser(chatuser);
+
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (_) => const HomeScreen()));
+                    Dialogs.showSnackbar(context, "User has been removed");
+                  },
+                  child: const Text(
+                    "Yes",
+                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                  ),
+                )
+              ],
+            ));
+
+    return request;
   }
 }

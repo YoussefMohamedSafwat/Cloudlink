@@ -152,8 +152,8 @@ class UnreadMessageBadge extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
-          width: 15,
-          height: 15,
+          width: 20,
+          height: 20,
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           child: Text(
             "$unreadCount",

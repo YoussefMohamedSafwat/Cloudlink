@@ -5,12 +5,34 @@ import 'package:appchat/api/apis.dart';
 import 'package:appchat/models/chat_user.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 
+// Initialize Flutter Local Notifications Plugin
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 class NotificationService {
   static FirebaseMessaging fmessaging = FirebaseMessaging.instance;
+
+  static Future<void> initialize() async {
+    // Initialize Flutter Local Notifications
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    // Set up Firebase Messaging
+    await getMessageToken();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _handleMessage(message);
+    });
+  }
 
   static Future<void> getMessageToken() async {
     await fmessaging.requestPermission();
@@ -20,19 +42,13 @@ class NotificationService {
         log('Push Token : $t');
       }
     });
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (message.notification != null) {
-        log('Message contained a notification : ${message.notification}');
-      }
-    });
   }
 
   static Future<String> getAccessToken() async {
     String fMessagingScope =
         "https://www.googleapis.com/auth/firebase.messaging";
     final client = await clientViaServiceAccount(
-      ServiceAccountCredentials.fromJson({dotenv.env["GOOGLECREDENTIAL"]}),
+      ServiceAccountCredentials.fromJson(dotenv.env["GOOGLECREDENTIAL"]),
       [fMessagingScope],
     );
 
@@ -67,6 +83,42 @@ class NotificationService {
       log("response body : ${response.body}");
     } catch (e) {
       log('response error  : $e');
+    }
+  }
+
+  static void _handleMessage(RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+
+    if (notification != null && android != null) {
+      // Create a notification channel if it doesn't exist
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications', // title
+        description:
+            'This channel is used for important notifications.', // description
+        importance: Importance.high,
+      );
+
+      flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+
+      // Show the notification
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            icon: android.smallIcon,
+          ),
+        ),
+      );
     }
   }
 }

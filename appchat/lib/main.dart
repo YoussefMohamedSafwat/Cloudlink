@@ -1,5 +1,6 @@
 import 'package:appchat/Screens/auth/login_Screen.dart';
 import 'package:appchat/Screens/splash_screen.dart';
+import 'package:appchat/api/notifications.dart';
 import 'package:appchat/res/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,9 +21,9 @@ void main() async {
     systemNavigationBarColor: Colors.transparent,
   ));
 
-  await dotenv.load(fileName: ".env");
   _initalizeFirebase();
-
+  NotificationService.initialize();
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
